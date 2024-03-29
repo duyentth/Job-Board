@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createJob } from "../lib/graphql/queries";
+import { useCreateJob } from "../lib/graphql/hooks";
 
 function CreateJobPage() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const navigate = useNavigate();
+  const { createJob, loading, error } = useCreateJob();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const job = await createJob(title, description);
+    console.log("job created: ", job);
     navigate(`/jobs/${job.id}`);
   };
-
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Submission error</div>;
   return (
     <div>
       <h1 className="title">New Job</h1>
@@ -42,7 +45,11 @@ function CreateJobPage() {
           </div>
           <div className="field">
             <div className="control">
-              <button className="button is-link" onClick={handleSubmit}>
+              <button
+                className="button is-link"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
                 Submit
               </button>
             </div>

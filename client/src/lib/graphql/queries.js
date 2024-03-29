@@ -21,12 +21,12 @@ const authLink = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   link: concat(authLink, httpLink),
   cache: new InMemoryCache(),
 });
 
-const jobDetailFragment = gql`
+export const jobDetailFragment = gql`
   fragment JobDetail on Job {
     id
     title
@@ -38,7 +38,7 @@ const jobDetailFragment = gql`
     }
   }
 `;
-const getJobByIdQuery = gql`
+export const getJobByIdQuery = gql`
   query jobById($jobId: ID!) {
     job(id: $jobId) {
       ...JobDetail
@@ -46,53 +46,37 @@ const getJobByIdQuery = gql`
   }
   ${jobDetailFragment}
 `;
-export const getJobById = async (id) => {
-  const { data } = await apolloClient.query({
-    query: getJobByIdQuery,
-    variables: { jobId: id },
-  });
-  return data.job;
-};
-
-export const getJobs = async () => {
-  const query = gql`
-    query {
+export const getCompanyByIdQuery = gql`
+  query company($compId: ID!) {
+    company(id: $compId) {
+      id
+      name
+      description
       jobs {
-        ...JobDetail
-      }
-    }
-    ${jobDetailFragment}
-  `;
-  const { data } = await apolloClient.query({
-    query,
-    fetchPolicy: "network-only",
-  });
-  return data.jobs;
-};
-
-export const getCompanyById = async (id) => {
-  const query = gql`
-    query company($compId: ID!) {
-      company(id: $compId) {
         id
-        name
+        title
         description
-        jobs {
-          id
-          title
-          description
-          date
-        }
+        date
       }
     }
-  `;
-  const { data } = await apolloClient.query({
-    query,
-    variables: { compId: id },
-  });
-  return data.company;
-};
-
+  }
+`;
+export const getJobsQuery = gql`
+  query {
+    jobs {
+      ...JobDetail
+    }
+  }
+  ${jobDetailFragment}
+`;
+export const createJobMutation = gql`
+  mutation createJob($input: CreateJobInput!) {
+    job: createJob(input: $input) {
+      ...JobDetail
+    }
+  }
+  ${jobDetailFragment}
+`;
 export const createJob = async (title, description) => {
   const mutation = gql`
     mutation createJob($input: CreateJobInput!) {
