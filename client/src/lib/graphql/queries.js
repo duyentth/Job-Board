@@ -41,10 +41,16 @@ export const jobDetailFragment = gql`
 export const getJobByIdQuery = gql`
   query jobById($jobId: ID!) {
     job(id: $jobId) {
-      ...JobDetail
+      id
+      title
+      description
+      date
+      company {
+        id
+        name
+      }
     }
   }
-  ${jobDetailFragment}
 `;
 export const getCompanyByIdQuery = gql`
   query company($compId: ID!) {
@@ -62,12 +68,21 @@ export const getCompanyByIdQuery = gql`
   }
 `;
 export const getJobsQuery = gql`
-  query {
-    jobs {
-      ...JobDetail
+  query Jobs($limit: Int, $offset: Int) {
+    jobs(limit: $limit, offset: $offset) {
+      items {
+        id
+        title
+        description
+        date
+        company {
+          id
+          name
+        }
+      }
+      totalCount
     }
   }
-  ${jobDetailFragment}
 `;
 export const createJobMutation = gql`
   mutation createJob($input: CreateJobInput!) {
